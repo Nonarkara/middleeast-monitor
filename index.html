@@ -3613,14 +3613,23 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<div id="header">
-  <div class="logo-strip" style="background:#fff;padding:3px 8px;border-radius:5px;">
-    <img src="https://nonarkara.github.io/globalmonitor/pmua-logo.webp" alt="PMUA" style="height:18px;object-fit:contain;" onerror="this.style.display='none'">
-    <img src="https://nonarkara.github.io/globalmonitor/Logo%20depa-01.png" alt="depa" style="height:14px;object-fit:contain;" onerror="this.style.display='none'">
-    <img src="https://nonarkara.github.io/globalmonitor/axiom-logo.png" alt="Axiom" style="height:14px;object-fit:contain;" onerror="this.style.display='none'">
-    <img src="https://nonarkara.github.io/globalmonitor/retl-logo.svg" alt="ReTL" style="height:14px;object-fit:contain;" onerror="this.style.display='none'">
+<!-- SPONSOR LOGOS — always visible, above everything -->
+<div style="position:fixed;top:0;left:0;right:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:4px 0;background:rgba(10,14,20,0.95);border-bottom:1px solid rgba(255,255,255,0.06);">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="background:#fff;padding:4px 10px;border-radius:5px;display:flex;align-items:center;gap:8px;">
+      <img src="https://nonarkara.github.io/globalmonitor/pmua-logo.webp" alt="PMUA" style="height:20px;object-fit:contain;" onerror="this.style.display='none'">
+      <div style="width:1px;height:14px;background:rgba(0,0,0,0.08);"></div>
+      <img src="https://nonarkara.github.io/globalmonitor/Logo%20depa-01.png" alt="depa" style="height:16px;object-fit:contain;" onerror="this.style.display='none'">
+      <div style="width:1px;height:14px;background:rgba(0,0,0,0.08);"></div>
+      <img src="https://nonarkara.github.io/globalmonitor/axiom-logo.png" alt="Axiom" style="height:16px;object-fit:contain;" onerror="this.style.display='none'">
+      <img src="https://nonarkara.github.io/globalmonitor/retl-logo.svg" alt="ReTL" style="height:15px;object-fit:contain;" onerror="this.style.display='none'">
+    </div>
+    <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1.5px;">PMUA · depa · AXIOM · ReTL</span>
   </div>
+</div>
+
+<!-- HEADER -->
+<div id="header" style="top:30px !important;">
   <div class="pulse-dot"></div>
   <div class="logo">Middle East <span>//</span> War Monitor</div>
   <div class="live-badge">LIVE</div>
