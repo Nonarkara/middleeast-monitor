@@ -4749,8 +4749,11 @@ function initMap() {
   map = L.map('map', {
     center: [29.5, 39.5],
     zoom: 5,
+    minZoom: 3,
+    maxZoom: 18,
     zoomControl: true,
-    attributionControl: false
+    attributionControl: false,
+    worldCopyJump: false
   });
   window.map = map; // expose for resize handlers
 
