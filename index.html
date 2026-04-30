@@ -826,7 +826,7 @@
 
   /* ── CENTER MAP ──────────────────────────────────────────── */
   #map-container {
-    height: 500px;
+    height: clamp(300px, 52vh, 620px);
     min-height: 200px;
     flex-shrink: 0;
     position: relative;
@@ -893,7 +893,8 @@
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
-    padding: 5px 12px;
+    padding: 8px 14px;
+    min-height: 44px;
     cursor: pointer;
     transition: color 0.2s, border-color 0.2s;
   }
