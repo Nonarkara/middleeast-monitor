@@ -3616,6 +3616,7 @@
 
 
 </style>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "0da324da0e204440a172088c0fafc92c"}' ></script>
 </head>
 <body>
 
@@ -4604,11 +4605,9 @@ const FEEDS = [
 
 // Proxies tried in order for each feed
 const PROXIES = [
-  { type: 'rss2json',    base: 'https://api.rss2json.com/v1/api.json?rss_url='          },
-  { type: 'codetabs',    base: 'https://api.codetabs.com/v1/proxy?quest='               },
-  { type: 'feed2json',   base: 'https://www.toptal.com/developers/feed2json/convert?url=' },
-  { type: 'allorigins',  base: 'https://api.allorigins.win/raw?url='                    },
-  { type: 'corsproxy',   base: 'https://corsproxy.io/?'                                 },
+  { type: 'globalmonitor-raw', base: 'https://globalmonitor.fly.dev/api/proxy/raw?url=' },
+  { type: 'rss2json',          base: 'https://api.rss2json.com/v1/api.json?rss_url='   },
+  { type: 'feed2json',         base: 'https://www.toptal.com/developers/feed2json/convert?url=' },
 ];
 
 const TIER1_CYCLE_MS = 2 * 60 * 1000;  // 2 minutes
@@ -4759,6 +4758,9 @@ function initMap() {
   window.map = map; // expose for resize handlers
 
   tileLayer = L.tileLayer(TILE_URLS[theme], { maxZoom: 18 }).addTo(map);
+  // Force resize after layout settles — 50ms too short for complex CSS grids
+  setTimeout(() => { map.invalidateSize({ pan: false }); tileLayer.redraw(); }, 400);
+  setTimeout(() => map.invalidateSize({ pan: false }), 1000);
 
   // Aerosol overlay (MODIS AOD via NASA GIBS — 2 days ago for processing lag)
   var aeroDate = new Date(Date.now() - 2*864e5).toISOString().slice(0,10);
@@ -5088,7 +5090,7 @@ async function refreshDeaths() {
       '&filter[field]=country.iso3&filter[value][]=PSE&filter[value][]=LBN' +
       '&filter[value][]=SYR&filter[value][]=YEM' +
       '&limit=10&fields[include][]=body&fields[include][]=title&sort[]=date.created:desc';
-    const proxied = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const proxied = `https://globalmonitor.fly.dev/api/proxy/get?url=${encodeURIComponent(url)}`;
     const res  = await fetch(proxied, { signal: AbortSignal.timeout(15000) });
     const wrap = await res.json();
     const data = JSON.parse(wrap.contents)?.data || [];
@@ -7273,7 +7275,7 @@ async function fetchACLED() {
   if (!el || !ACLED_KEY) return;
   try {
     const url   = `https://api.acleddata.com/acled/read/?key=${ACLED_KEY}&iso=364,376,275,422,760,887,368,586,004&limit=50&fields=event_date,event_type,country,location,fatalities,notes&format=json`;
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const proxy = `https://globalmonitor.fly.dev/api/proxy/get?url=${encodeURIComponent(url)}`;
     const res   = await fetch(proxy, { signal: AbortSignal.timeout(12000) });
     const wrap  = await res.json();
     const data  = JSON.parse(wrap.contents);
@@ -7363,7 +7365,7 @@ async function fetchUNHCR() {
   if (!grid) return;
   try {
     const url   = 'https://api.unhcr.org/population/v1/population/?limit=20&dataset=population&displayType=totals&countries=PSE,LBN,SYR,YEM,IRQ,AFG&yearFrom=2024&yearTo=2024';
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const proxy = `https://globalmonitor.fly.dev/api/proxy/get?url=${encodeURIComponent(url)}`;
     const res   = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
     const wrap  = await res.json();
     const data  = JSON.parse(wrap.contents);
@@ -7407,7 +7409,7 @@ async function fetchRWReports() {
   if (!list) return;
   try {
     const url   = 'https://api.reliefweb.int/v1/reports?appname=middleeastmonitor&filter[field]=country.iso3&filter[value][]=PSE&filter[value][]=LBN&filter[value][]=YEM&limit=10&fields[include][]=title&fields[include][]=date&fields[include][]=country&fields[include][]=url';
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const proxy = `https://globalmonitor.fly.dev/api/proxy/get?url=${encodeURIComponent(url)}`;
     const res   = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
     const wrap  = await res.json();
     const data  = JSON.parse(wrap.contents);
@@ -7876,7 +7878,7 @@ async function fetchCommodities() {
   for (const c of COMM_SYMBOLS) {
     try {
       const url   = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(c.sym)}?interval=1d&range=2d`;
-      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const proxy = `https://globalmonitor.fly.dev/api/proxy/get?url=${encodeURIComponent(url)}`;
       const res   = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
       const wrap  = await res.json();
       const meta  = JSON.parse(wrap.contents)?.chart?.result?.[0]?.meta;
@@ -8025,7 +8027,7 @@ async function fetchAviationRadar() {
   try {
     // OpenSky public API – all flights, no auth needed
     const url = 'https://opensky-network.org/api/states/all?lamin=20&lomin=25&lamax=45&lomax=65';
-    const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    const proxy = 'https://globalmonitor.fly.dev/api/proxy/get?url=' + encodeURIComponent(url);
     const res  = await fetch(proxy);
     const wrap = await res.json();
     const data = JSON.parse(wrap.contents || '{}');
@@ -8572,7 +8574,7 @@ async function fetchOCHAFunding() {
 
   try {
     // Try OCHA HPC API
-    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(
+    const proxy = 'https://globalmonitor.fly.dev/api/proxy/raw?url=' + encodeURIComponent(
       'https://api.hpc.tools/v1/public/plan/year/2025?format=json'
     );
     const res  = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
@@ -8757,7 +8759,7 @@ async function fetchOpenSkyMap() {
   if (!openskyVisible) return;
   try {
     const url   = 'https://opensky-network.org/api/states/all?lamin=20&lomin=25&lamax=45&lomax=65';
-    const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    const proxy = 'https://globalmonitor.fly.dev/api/proxy/get?url=' + encodeURIComponent(url);
     const res   = await fetch(proxy, { signal: AbortSignal.timeout(10000) });
     const wrap  = await res.json();
     const data  = JSON.parse(wrap.contents || '{}');
