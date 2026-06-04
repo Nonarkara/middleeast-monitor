@@ -3623,7 +3623,7 @@
 <!-- SPONSOR LOGOS — always visible, above everything -->
 <div style="position:fixed;top:0;left:0;right:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:4px 0;background:rgba(10,14,20,0.95);border-bottom:1px solid rgba(255,255,255,0.06);">
   <div style="display:flex;align-items:center;gap:12px;">
-    <div style="background:#fff;padding:4px 10px;border-radius:5px;display:flex;align-items:center;gap:8px;">
+    <div style="background:#fff;padding:4px 10px;border-radius:0;display:flex;align-items:center;gap:8px;">
       <img src="https://nonarkara.github.io/globalmonitor/pmua-logo.webp" alt="PMUA" style="height:20px;object-fit:contain;" onerror="this.style.display='none'">
       <div style="width:1px;height:14px;background:rgba(0,0,0,0.08);"></div>
       <img src="https://nonarkara.github.io/globalmonitor/Logo%20depa-01.png" alt="depa" style="height:16px;object-fit:contain;" onerror="this.style.display='none'">
@@ -8850,17 +8850,17 @@ function updateDynLayerBtn(id, visible) {
 </script>
 
 <!-- About button (floating, non-obstructive) -->
-<button id="aboutBtn" style="position:fixed;bottom:12px;right:12px;z-index:2000;width:28px;height:28px;border-radius:50%;background:rgba(20,24,36,0.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.35);font:600 0.65rem/1 'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="About this project">i</button>
+<button id="aboutBtn" style="position:fixed;bottom:12px;right:12px;z-index:2000;width:28px;height:28px;border-radius:50%;background:#141824;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.35);font:600 0.65rem/1 'JetBrains Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="About this project">i</button>
 
 <!-- About modal -->
-<div id="aboutModal" style="display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);">
-  <div style="width:540px;max-width:92vw;max-height:85vh;background:rgba(14,18,28,0.95);backdrop-filter:blur(24px);border-radius:16px;border:1px solid rgba(255,255,255,0.08);overflow:auto;padding:28px 32px;">
+<div id="aboutModal" style="display:none;position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);">
+  <div style="width:540px;max-width:92vw;max-height:85vh;background:#0d1117;border:1px solid rgba(255,255,255,0.08);overflow:auto;padding:28px 32px;">
     <div style="text-align:center;margin-bottom:14px;">
       <div style="font:500 0.4rem/1 monospace;color:rgba(255,255,255,0.25);letter-spacing:2px;margin-bottom:8px;">FUNDED BY</div>
       <img src="https://nonarkara.github.io/globalmonitor/pmua-logo.webp" alt="PMUA" style="height:36px;filter:brightness(1.8) contrast(0.9);opacity:0.9;" onerror="this.style.display='none'">
-      <div style="font:400 0.5rem/1 'Inter',sans-serif;color:rgba(255,255,255,0.4);margin-top:4px;">Program Management Unit for Area Based Development</div>
+      <div style="font:400 0.5rem/1 'JetBrains Mono',monospace;color:rgba(255,255,255,0.4);margin-top:4px;">Program Management Unit for Area Based Development</div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;">
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;padding:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);">
       <img src="https://nonarkara.github.io/globalmonitor/Logo%20depa-01.png" alt="depa" style="height:20px;filter:brightness(1.8) contrast(0.9);opacity:0.75;" onerror="this.style.display='none'">
       <img src="https://nonarkara.github.io/globalmonitor/mdes.png" alt="MDES" style="height:20px;filter:brightness(1.8) contrast(0.9);opacity:0.6;" onerror="this.style.display='none'">
       <img src="https://nonarkara.github.io/globalmonitor/smart-city-thailand-logo.svg" alt="Smart City Thailand" style="height:18px;filter:brightness(1.5);opacity:0.55;" onerror="this.style.display='none'">
@@ -8870,14 +8870,14 @@ function updateDynLayerBtn(id, visible) {
       <img src="https://nonarkara.github.io/globalmonitor/axiom-logo.png" alt="Axiom" style="height:20px;filter:brightness(1.8) contrast(0.9);opacity:0.8;" onerror="this.style.display='none'">
       <img src="https://nonarkara.github.io/globalmonitor/retl-logo.svg" alt="ReTL" style="height:18px;filter:brightness(1.8) invert(1);opacity:0.8;" onerror="this.style.display='none'">
     </div>
-    <h2 style="font:600 1rem/1.3 'Inter',sans-serif;color:rgba(255,255,255,0.9);margin-bottom:4px;">Middle East // War Monitor</h2>
+    <h2 style="font:600 1rem/1.3 'Josefin Sans',sans-serif;color:rgba(255,255,255,0.9);margin-bottom:4px;">Middle East // War Monitor</h2>
     <p style="font:400 0.6rem/1 monospace;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:14px;">REAL-TIME CONFLICT INTELLIGENCE</p>
-    <div style="font:400 0.72rem/1.7 'Inter',sans-serif;color:rgba(255,255,255,0.55);">
+    <div style="font:400 0.72rem/1.7 'Josefin Sans',sans-serif;color:rgba(255,255,255,0.55);">
       <p style="margin-bottom:10px;">This project is supported by the <strong style="color:rgba(255,255,255,0.85);">Program Management Unit for Area Based Development (PMU A)</strong> and the <strong style="color:rgba(255,255,255,0.85);">Digital Economy Promotion Agency (depa)</strong>, with project execution by <strong style="color:rgba(255,255,255,0.85);">Axiom</strong> and <strong style="color:rgba(255,255,255,0.85);">ReTL (The Reason to Live Company)</strong>.</p>
       <p style="margin-bottom:10px;">Created by <strong style="color:rgba(255,255,255,0.85);">Dr. Non Arkaraprasertkul</strong> — architect, urban designer, and smart city specialist; Harvard-affiliated doctoral researcher in anthropology and cities focused on human-centered smart cities and real-world implementation — and <strong style="color:rgba(255,255,255,0.85);">Associate Professor Dr. Poon Thiengburanathum</strong>, as a public ranking model designed to explore alternative ways of understanding urban performance.</p>
       <p>Their work sits at the intersection of urban design, data, and human behavior, bringing a distinctly people-centered perspective to how cities are measured and experienced.</p>
     </div>
-    <div style="padding:10px 12px;margin:14px 0;background:rgba(255,255,255,0.02);border-radius:6px;border:1px solid rgba(255,255,255,0.04);font:400 0.55rem/1.6 'Inter',sans-serif;color:rgba(255,255,255,0.3);">
+    <div style="padding:10px 12px;margin:14px 0;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);font:400 0.55rem/1.6 'JetBrains Mono',monospace;color:rgba(255,255,255,0.3);">
       <strong style="color:rgba(255,255,255,0.4);">Legal Notice</strong><br>
       This dashboard and all associated intellectual property — including but not limited to its design, source code, data architecture, analytical methodologies, and visual identity — are the proprietary work of Dr. Non Arkaraprasertkul and Associate Professor Dr. Poon Thiengburanathum. All rights reserved.<br><br>
       This work is provided for informational and research purposes only. The data presented is aggregated from publicly available open-source intelligence (OSINT) feeds and should not be construed as official government intelligence or policy guidance. The creators assume no liability for decisions made based on this information.<br><br>
@@ -8885,7 +8885,7 @@ function updateDynLayerBtn(id, visible) {
     </div>
     <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font:400 0.45rem/1 monospace;color:rgba(255,255,255,0.2);">PMUA · depa · Axiom · ReTL</span>
-      <button id="aboutClose" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:6px 16px;color:rgba(255,255,255,0.6);cursor:pointer;font:400 0.65rem/1 'Inter',sans-serif;">Close</button>
+      <button id="aboutClose" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:6px 16px;color:rgba(255,255,255,0.6);cursor:pointer;font:400 0.65rem/1 'JetBrains Mono',monospace;">Close</button>
     </div>
   </div>
 </div>
