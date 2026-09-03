@@ -2914,7 +2914,7 @@
 
   .cyber-row {
     display: grid;
-    grid-template-columns: 10px 1fr 52px 72px;
+    grid-template-columns: 10px 1fr auto;
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
@@ -3734,7 +3734,8 @@
     <!-- LIVE INTELLIGENCE LOG -->
     <div id="intel-log-panel">
       <div class="stats-title">
-        Live Intelligence Log
+        Intelligence Log
+        <span class="stats-updated">SIMULATED</span>
         <span class="stats-updated" id="il-count"></span>
       </div>
       <div id="intel-log-scroll"><!-- injected by JS --></div>
@@ -3742,7 +3743,7 @@
 
     <!-- THREAT LEVEL GAUGES -->
     <div id="threat-gauges">
-      <div class="stats-title">Threat Level Gauges <span class="stats-updated">SIMULATED</span></div>
+      <div class="stats-title">Threat Level Gauges <span class="stats-updated">SIMULATED · analyst-set, updated by hand</span></div>
       <div id="tg-list"><!-- injected by JS --></div>
     </div>
 
@@ -4236,9 +4237,9 @@
 
         <!-- Left: Connectivity panel -->
         <div class="cyber-panel">
-          <div class="cyber-panel-head">Regional Connectivity — 24h Trend</div>
+          <div class="cyber-panel-head">Regional Connectivity <span class="stats-updated">SIMULATED</span></div>
           <div id="cyber-city-rows"><!-- injected by JS --></div>
-          <div class="cyber-footer" id="cyber-upd">LAST UPDATED —</div>
+          <div class="cyber-footer" id="cyber-upd">SIMULATED · analyst-set status words, not measured · AS OF 07 APR 2026</div>
         </div>
 
         <!-- Right: Critical Nodes panel -->
@@ -5173,58 +5174,30 @@ function updateActiveFronts() {
   }
 }
 
-// ── SIMULATED SEED VALUES (shown immediately, replaced by live data when available) ──
+// ── SEED VALUES — authored 2026-04-07, rendered ONCE and never ticked; a live fetch overwrites them ──
+// injured / children / aidworkers have no data path at all: they render "—" with NO SOURCE.
+const STAT_SEED_TS = 'AS OF 07 APR 2026 · seeded, not fetched';
 const STAT_SEEDS = {
-  deaths:     { base: 46913,  rate: [1, 4],   badge: 'ESTIMATED',    badgeClass: 'orange' },
-  injured:    { base: 110820, rate: [2, 7],   badge: 'ESTIMATED',    badgeClass: 'orange' },
-  displaced:  { base: 2300000,rate: [80,300], badge: 'ESTIMATED',    badgeClass: 'orange' },
-  children:   { base: 17400,  rate: [0, 2],   badge: 'ESTIMATED',    badgeClass: 'orange' },
-  aidworkers: { base: 340,    rate: [0, 1],   badge: 'ESTIMATED',    badgeClass: 'orange' },
-  fronts:     { base: 7,      rate: [0, 0],   badge: 'SIMULATED',    badgeClass: 'dim' },
+  deaths:     { base: 46913,   badge: 'SEED · NO SOURCE', badgeClass: 'red' },
+  displaced:  { base: 2300000, badge: 'SEED · NO SOURCE', badgeClass: 'red' },
+  fronts:     { base: 7,       badge: 'SIMULATED',        badgeClass: 'dim' },
+  injured:    { base: null,    badge: 'NO SOURCE',        badgeClass: 'dim' },
+  children:   { base: null,    badge: 'NO SOURCE',        badgeClass: 'dim' },
+  aidworkers: { base: null,    badge: 'NO SOURCE',        badgeClass: 'dim' },
 };
 
 function seedStats() {
-  const ts = Date.now();
   for (const [key, seed] of Object.entries(STAT_SEEDS)) {
-    if (STATS[key].value === 0) {
-      updateStatUI(key, {
-        value: seed.base,
-        badge: seed.badge,
-        badgeClass: seed.badgeClass,
-        ts,
-      });
-    }
-  }
-}
-
-// ── LIVE MICRO-TICKER: small random increments every 3–8 seconds ──
-function liveStatTicker() {
-  const keys = ['deaths', 'injured', 'displaced', 'children', 'aidworkers'];
-  function tick() {
-    const key = keys[Math.floor(Math.random() * keys.length)];
-    const seed = STAT_SEEDS[key];
-    if (!seed || STATS[key].value === 0) return;
-    const [lo, hi] = seed.rate;
-    const inc = Math.floor(Math.random() * (hi - lo + 1)) + lo;
-    if (inc === 0) return;
-    const newVal = STATS[key].value + inc;
+    if (STATS[key].value !== 0) continue;
     const valEl = document.getElementById(`stat-${key}`);
-    if (valEl) {
-      const prev = STATS[key].value;
-      STATS[key].value = newVal;
-      animateCounter(valEl, newVal, STATS[key].format, 800, prev);
-      valEl.classList.remove('stat-tick');
-      void valEl.offsetWidth;
-      valEl.classList.add('stat-tick');
+    const tsEl  = document.getElementById(`stat-${key}-ts`);
+    if (seed.base != null) {
+      STATS[key].value = seed.base;
+      if (valEl) valEl.textContent = formatStatValue(seed.base, STATS[key].format);
     }
-    // Update timestamp
-    const tsEl = document.getElementById(`stat-${key}-ts`);
-    STATS[key].lastUpdated = Date.now();
-    if (tsEl) tsEl.textContent = 'LAST UPDATED: just now';
+    updateStatUI(key, { badge: seed.badge, badgeClass: seed.badgeClass });
+    if (tsEl) tsEl.textContent = seed.base != null ? STAT_SEED_TS : '—';
   }
-  setInterval(tick, 4000 + Math.random() * 3000);
-  // Stagger a second ticker for more frequent visual updates
-  setTimeout(() => setInterval(tick, 5000 + Math.random() * 4000), 2000);
 }
 
 function initStats() {
@@ -5232,11 +5205,8 @@ function initStats() {
   const dateEl = document.getElementById('stats-date');
   if (dateEl) dateEl.textContent = `AS OF ${String(now.getUTCDate()).padStart(2,'0')} ${STAT_MONTHS[now.getUTCMonth()]} ${now.getUTCFullYear()}`;
 
-  // Seed simulated values immediately so numbers always show
+  // Seed static, badged figures once; real fetches overwrite them
   setTimeout(seedStats, 400);
-
-  // Start live micro-ticker
-  setTimeout(liveStatTicker, 2500);
 
   // Kick off real data fetches (staggered)
   setTimeout(updateActiveFronts, 800);
@@ -6749,19 +6719,14 @@ const IL_POOL = [
   { tag: 'osint',  text: 'IDF strike assessment team reportedly deployed to Golan Heights sector' },
 ];
 
-let ilEntries = [], ilPoolIdx = 0;
-
-function ilNow() {
-  return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
+let ilEntries = [];
 
 function renderIntelLog() {
   const el = document.getElementById('intel-log-scroll');
   if (!el) return;
-  el.innerHTML = ilEntries.map((e, i) =>
-    `<div class="il-entry${i === 0 ? ' il-new' : ''}">
+  el.innerHTML = ilEntries.map(e =>
+    `<div class="il-entry">
       <div class="il-meta">
-        <span class="il-time">${e.time}</span>
         <span class="il-tag ${e.tag}">${e.tag.toUpperCase()}</span>
       </div>
       <div class="il-text">${e.text}</div>
@@ -6769,101 +6734,46 @@ function renderIntelLog() {
   ).join('');
   el.scrollTop = 0;
   const cnt = document.getElementById('il-count');
-  if (cnt) cnt.textContent = ilEntries.length + ' ENTRIES';
+  if (cnt) cnt.textContent = ilEntries.length + ' ENTRIES · AUTHORED 07 APR 2026';
 }
-
-function ilAddEntry() {
-  const item = IL_POOL[ilPoolIdx % IL_POOL.length];
-  ilPoolIdx++;
-  ilEntries.unshift({ tag: item.tag, text: item.text, time: ilNow() });
-  if (ilEntries.length > 40) ilEntries.length = 40;
-  renderIntelLog();
-}
-
 
 function initIntelLog() {
-  // Pre-fill with 12 entries (staggered backwards in time)
-  const now = Date.now();
-  for (let i = 11; i >= 0; i--) {
-    const item = IL_POOL[ilPoolIdx % IL_POOL.length];
-    ilPoolIdx++;
-    const t = new Date(now - i * 95000); // ~every 95s back
-    ilEntries.push({
-      tag:  item.tag,
-      text: item.text,
-      time: t.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-    });
-  }
+  // Static authored entries — rendered once, no wall-clock stamps, no cycling
+  ilEntries = IL_POOL.map(item => ({ tag: item.tag, text: item.text }));
   renderIntelLog();
-  setInterval(ilAddEntry, 25000);
 }
 
 // ══ CYBER & INFRASTRUCTURE STATUS ══════════════════════════════
+// Status words are analyst-set (SIMULATED) — nothing here is measured.
 const CYBER_CITIES = [
-  { id: 'teh', name: 'TEHRAN',     cc: 'IRN', status: 'degraded', pct: 61.4 },
-  { id: 'jrs', name: 'JERUSALEM',  cc: 'ISR', status: 'stable',   pct: 97.8 },
-  { id: 'bey', name: 'BEIRUT',     cc: 'LBN', status: 'outage',   pct: 23.1 },
-  { id: 'bgd', name: 'BAGHDAD',    cc: 'IRQ', status: 'degraded', pct: 74.2 },
-  { id: 'gaz', name: 'GAZA',       cc: 'PSE', status: 'outage',   pct:  8.3 },
-  { id: 'dxb', name: 'DUBAI',      cc: 'UAE', status: 'stable',   pct: 99.1 },
+  { id: 'teh', name: 'TEHRAN',     cc: 'IRN', status: 'degraded' },
+  { id: 'jrs', name: 'JERUSALEM',  cc: 'ISR', status: 'stable'   },
+  { id: 'bey', name: 'BEIRUT',     cc: 'LBN', status: 'outage'   },
+  { id: 'bgd', name: 'BAGHDAD',    cc: 'IRQ', status: 'degraded' },
+  { id: 'gaz', name: 'GAZA',       cc: 'PSE', status: 'outage'   },
+  { id: 'dxb', name: 'DUBAI',      cc: 'UAE', status: 'stable'   },
 ];
 
 const CYBER_NODES = [
   { tag: 'SBM', name: 'SUBMARINE CABLES',    sub: 'AAE-1 · SEA-ME-WE-5 · IMEWE',     status: 'ACTIVE',        color: 'green'  },
   { tag: 'PWR', name: 'POWER GRID',           sub: 'IRN/LBN LOAD SHEDDING ACTIVE',    status: 'LOAD SHEDDING', color: 'orange' },
   { tag: 'SAT', name: 'SATELLITE LINK',       sub: 'KU/KA-BAND · 256-BIT ENC',        status: 'ENCRYPTED',     color: 'green'  },
-  { tag: 'BGP', name: 'BGP ROUTING',          sub: 'AS12880 IRN · AS9051 LBN ANOMALY', status: 'ANOMALY',      color: 'orange' },
+  { tag: 'BGP', name: 'BGP ROUTING',          sub: 'IRN / LBN ROUTE ANOMALY — SIMULATED', status: 'ANOMALY',      color: 'orange' },
   { tag: 'DNS', name: 'DNS RESOLUTION',       sub: 'ROOT SERVERS NOMINAL',             status: 'NOMINAL',       color: 'green'  },
   { tag: 'IXP', name: 'INTERNET EXCHANGE',    sub: 'DE-CIX · LINX NOMINAL',           status: 'NOMINAL',       color: 'green'  },
 ];
 
-function cyberGenTrend(base, status) {
-  const pts = [];
-  let v = base;
-  for (let i = 0; i < 24; i++) {
-    const jitter = (Math.random() - 0.5) * (status === 'outage' ? 12 : status === 'degraded' ? 7 : 2.5);
-    v = Math.max(0, Math.min(100, v + jitter));
-    pts.push(v);
-  }
-  // Sharp drop for outage/degraded cities in the last 6-10 hours
-  if (status === 'outage') {
-    const drop = 14 + Math.floor(Math.random() * 6);
-    for (let i = drop; i < 24; i++) pts[i] = Math.max(0, pts[i] * 0.15 + Math.random() * 5);
-  } else if (status === 'degraded') {
-    const drop = 16 + Math.floor(Math.random() * 4);
-    for (let i = drop; i < 24; i++) pts[i] = Math.max(0, pts[i] * 0.55 + Math.random() * 8);
-  }
-  return pts;
-}
-
-function cyberSparkPath(pts) {
-  const W = 72, H = 26;
-  const lo = Math.min(...pts), hi = Math.max(...pts);
-  const range = hi - lo || 1;
-  return 'M' + pts.map((v, i) => {
-    const x = ((i / (pts.length - 1)) * (W - 2) + 1).toFixed(1);
-    const y = (H - 2 - ((v - lo) / range) * (H - 5)).toFixed(1);
-    return x + ',' + y;
-  }).join('L');
-}
-
 function renderCyberCities() {
   const el = document.getElementById('cyber-city-rows');
   if (!el) return;
-  el.innerHTML = CYBER_CITIES.map(c => {
-    const path = cyberSparkPath(cyberGenTrend(c.pct, c.status));
-    return `<div class="cyber-row">
+  el.innerHTML = CYBER_CITIES.map(c => `<div class="cyber-row">
       <div class="cyber-status-dot ${c.status}"></div>
       <div class="cyber-city-col">
         <span class="cyber-city-name">${c.name}</span>
         <span class="cyber-city-cc">${c.cc}</span>
       </div>
-      <div class="cyber-pct ${c.status}">${c.pct.toFixed(1)}%</div>
-      <svg class="cyber-spark ${c.status}" viewBox="0 0 72 26" preserveAspectRatio="none">
-        <path d="${path}"/>
-      </svg>
-    </div>`;
-  }).join('');
+      <div class="cyber-pct ${c.status}">${c.status.toUpperCase()}</div>
+    </div>`).join('');
 }
 
 function renderCyberNodes() {
@@ -6913,18 +6823,6 @@ function renderThreatGauges() {
       <span class="tg-label l${t.level}">${t.label}</span>
     </div>`;
   }).join('');
-  // Subtle random fluctuation every 45–90s
-  setTimeout(() => {
-    TG_DATA.forEach(t => {
-      if (Math.random() < 0.25) {
-        const delta = Math.random() < 0.5 ? 1 : -1;
-        t.level = Math.max(1, Math.min(5, t.level + delta));
-        const labels = ['','LOW','ELEVATED','HIGH','SEVERE','CRITICAL'];
-        t.label = labels[t.level];
-      }
-    });
-    renderThreatGauges();
-  }, 45000 + Math.random() * 45000);
 }
 
 // ── AIRSPACE STATUS ────────────────────────────────────────────
@@ -7017,18 +6915,7 @@ function renderAirstrikes() {
       <td><div class="as-bar-wrap"><div class="as-bar-bg"><div class="as-bar-fill" style="width:${pct}%"></div></div></div></td>
     </tr>`;
   }).join('');
-  if (upd) {
-    const now = new Date();
-    upd.textContent = `LAST UPDATED: ${now.toUTCString().slice(0,-4).toUpperCase()} UTC — ESTIMATED FIGURES`;
-  }
-  // Tick: add to today counter randomly every ~25–80s
-  setInterval(() => {
-    const row = AS_DATA[Math.floor(Math.random() * 3)]; // top 3 actors
-    row.today++;
-    row.d7++;
-    row.total++;
-    renderAirstrikes();
-  }, 25000 + Math.random() * 55000);
+  if (upd) upd.textContent = 'ESTIMATED · AS OF 07 APR 2026';
 }
 
 // ── MARITIME CHOKE POINTS ──────────────────────────────────────
@@ -7120,17 +7007,7 @@ function renderOps() {
 
 function initCyberStatus() {
   renderCyberNodes();
-  function tick() {
-    CYBER_CITIES.forEach(c => {
-      const d = (Math.random() - 0.5) * (c.status === 'outage' ? 2.5 : c.status === 'degraded' ? 1.8 : 0.4);
-      c.pct = Math.max(0, Math.min(100, c.pct + d));
-    });
-    renderCyberCities();
-    const upd = document.getElementById('cyber-upd');
-    if (upd) upd.textContent = 'LAST UPDATED  ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' UTC';
-  }
-  tick();
-  setInterval(tick, 8000);
+  renderCyberCities();
 }
 
 // ─── BELOW-FOLD: COLLAPSE TOGGLES + OOB FILTERS ───────────────
