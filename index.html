@@ -3463,7 +3463,7 @@
     .rsb-secondary.rsb-visible { display: block !important; }
 
     /* ── MAP: full width, 220px ── */
-    #map-container { height: 220px !important; }
+    #map-container { height: calc(100dvh - 148px) !important; min-height: 360px; }
     #map-fullscreen-btn { min-height: 44px; }
 
     /* ── MOBILE SIDEBAR TOGGLES (left sidebar only on mobile) ── */
@@ -3615,6 +3615,32 @@
   }
 
 
+  /* Map-first repair: the original dense status/news remain explicit drawers.
+     One navigation row opens them at every width; nothing is deleted. */
+  #app { display: block !important; }
+  #center-col { width: 100% !important; min-width: 0; }
+  #map-container { height: calc(100dvh - 148px) !important; min-height: 360px; isolation: isolate; }
+  #handle-left, #handle-right { display: none !important; }
+  #left-sidebar, #right-sidebar { display: none !important; }
+  #left-sidebar.wm-panel-open, #right-sidebar.wm-panel-open {
+    display: flex !important; flex-direction: column; position: fixed;
+    top: 56px; bottom: 86px; right: 0; left: auto;
+    width: min(420px, calc(100vw - 44px)); max-width: none;
+    height: auto; overflow: auto; z-index: 500; background: var(--surface1);
+  }
+  #mob-nav { display: flex !important; position: fixed; left: 0; right: 0;
+    bottom: 26px; height: 44px; z-index: 600; background: var(--surface1); }
+  .mob-nav-btn { flex: 1; display: flex; align-items: center; justify-content: center;
+    min-width: 44px; min-height: 44px; font: 600 12px/1.3 'Josefin Sans', sans-serif;
+    background: var(--surface1); color: var(--text); border: 0; border-top: 3px solid transparent; cursor: pointer; }
+  .mob-nav-btn.active { border-top-color: var(--red); color: var(--text); }
+  .mob-nav-icon { display: none; }
+  .mob-nav-label { font-size: 12px; }
+  #below-fold { padding-bottom: 110px; }
+  .wm-panel-open :is(.sbp-label,.sbp-val,.sbp-sub,.widget-src) { font-size: 12px; line-height: 1.5; }
+  .wm-panel-open :is(button,a) { min-height: 44px; }
+  .leaflet-control-attribution { max-width: calc(100vw - 8px); font-size: 11px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "0da324da0e204440a172088c0fafc92c"}' ></script>
 </head>
@@ -4716,8 +4742,8 @@ function updateCountdown() {
 
 // ─── THEME ────────────────────────────────────────────────────
 const TILE_URLS = {
-  dark:  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  dark:  'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+  light: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
 };
 let tileLayer = null;
 
@@ -4728,7 +4754,7 @@ function applyTheme(theme) {
 
   if (map && tileLayer) {
     map.removeLayer(tileLayer);
-    tileLayer = L.tileLayer(TILE_URLS[theme], { maxZoom: 18 }).addTo(map);
+    tileLayer = L.tileLayer(TILE_URLS[theme], { maxZoom: 18, maxNativeZoom: 16, attribution: 'Esri, HERE, Garmin, OpenStreetMap contributors' }).addTo(map);
     tileLayer.bringToBack();
   }
 }
@@ -4753,12 +4779,12 @@ function initMap() {
     minZoom: 3,
     maxZoom: 18,
     zoomControl: true,
-    attributionControl: false,
+    attributionControl: true,
     worldCopyJump: false
   });
   window.map = map; // expose for resize handlers
 
-  tileLayer = L.tileLayer(TILE_URLS[theme], { maxZoom: 18 }).addTo(map);
+  tileLayer = L.tileLayer(TILE_URLS[theme], { maxZoom: 18, maxNativeZoom: 16, attribution: 'Esri, HERE, Garmin, OpenStreetMap contributors' }).addTo(map);
   // Force resize after layout settles — 50ms too short for complex CSS grids
   setTimeout(() => { map.invalidateSize({ pan: false }); tileLayer.redraw(); }, 400);
   setTimeout(() => map.invalidateSize({ pan: false }), 1000);
@@ -8104,11 +8130,10 @@ function renderMilitaryDeployments() {
 
 // ── MOBILE SIDEBAR TOGGLES + BOTTOM NAV ──────────────────────
 function initMobileSidebars() {
-  if (window.innerWidth > 768) return;
 
   // LEFT SIDEBAR: collapse by default, inject toggle button
   const lsb = document.getElementById('left-sidebar');
-  if (lsb) {
+  if (lsb && window.innerWidth <= 768) {
     lsb.classList.add('mob-collapsed');
     const btn = document.createElement('button');
     btn.className = 'mob-sb-toggle-btn';
@@ -8134,7 +8159,13 @@ function initMobileSidebars() {
 }
 
 function initMobileNav() {
-  if (window.innerWidth > 768) return;
+  // The same explicit map/news/status doors work on a desktop and a phone.
+  function openPanel(id) {
+    document.querySelectorAll('#left-sidebar,#right-sidebar').forEach(el => {
+      el.classList.toggle('wm-panel-open', el.id === id);
+      if (el.id === id) { el.classList.remove('mob-collapsed'); el.scrollTop = 0; }
+    });
+  }
 
   function mobScrollTo(targetId) {
     const el = document.getElementById(targetId);
@@ -8152,22 +8183,33 @@ function initMobileNav() {
 
   document.getElementById('mob-nav-news')?.addEventListener('click', () => {
     setNavActive('news');
-    mobScrollTo('news-feed');
+    openPanel('right-sidebar');
   });
   document.getElementById('mob-nav-map')?.addEventListener('click', () => {
     setNavActive('map');
+    openPanel(null);
     mobScrollTo('map-container');
   });
   document.getElementById('mob-nav-status')?.addEventListener('click', () => {
     setNavActive('status');
-    mobScrollTo('conflict-section');
+    openPanel('left-sidebar');
   });
   document.getElementById('mob-nav-more')?.addEventListener('click', () => {
     setNavActive('more');
+    openPanel('right-sidebar');
     // Show secondary right-sidebar panels when MORE is tapped
     document.querySelectorAll('.rsb-secondary').forEach(el => el.classList.add('rsb-visible'));
-    mobScrollTo('below-fold');
+    const sidebar = document.getElementById('right-sidebar');
+    const firstWidget = sidebar?.querySelector('.rsb-secondary');
+    if (sidebar && firstWidget) sidebar.scrollTop += firstWidget.getBoundingClientRect().top - sidebar.getBoundingClientRect().top;
   });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    openPanel(null);
+    setNavActive('map');
+    document.getElementById('mob-nav-map')?.focus();
+  });
+  setNavActive('map');
 
   // Update active nav button on scroll
   const sections = [
@@ -8177,11 +8219,12 @@ function initMobileNav() {
     { id: 'below-fold',       key: 'more'   },
   ];
   window.addEventListener('scroll', () => {
+    if (document.querySelector('.wm-panel-open')) return;
     const scrollY = window.scrollY + 100;
-    let current = 'news';
+    let current = 'map';
     sections.forEach(s => {
       const el = document.getElementById(s.id);
-      if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s.key;
+      if (el?.getClientRects().length && el.getBoundingClientRect().top + window.scrollY <= scrollY) current = s.key;
     });
     setNavActive(current);
   }, { passive: true });
